@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop_n_goo/AppTheme.dart';
 import 'package:shop_n_goo/UserInfo/SignIn.dart';
+import 'package:shop_n_goo/cubit/auth/auth_cubit.dart';
+import 'package:shop_n_goo/cubit/auth/auth_states.dart';
+import 'package:shop_n_goo/data/models/auth/request/register_request.dart';
 
 class signUp extends StatefulWidget {
   static const String routeName = 'signUp';
@@ -11,6 +15,12 @@ class signUp extends StatefulWidget {
 }
 
 class _signUpState extends State<signUp> {
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+
   bool isMale = false;
   bool isFemale = false;
   final _formKey = GlobalKey<FormState>();
@@ -19,7 +29,8 @@ class _signUpState extends State<signUp> {
   void _navigateToSignIn() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => signIn()),
+      MaterialPageRoute(builder: (context) => BlocProvider<AuthCubit>(
+          create: (context) => AuthCubit(),child: signIn())),
     );
   }
 
@@ -42,25 +53,13 @@ class _signUpState extends State<signUp> {
     if (!RegExp(r'\d').hasMatch(password)) {
       return 'Password must contain at least one number';
     }
-    if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(password)) {
-      return 'Password must contain at least one special character';
-    }
-
     _password = password; // Save for confirmation check
     return null;
   }
 
-  String? validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
-    }
-    if (value.trim() != _password) {
-      return 'Passwords do not match';
-    }
-    return null;
-  }
 
   Widget _buildTextField({
+    required TextEditingController controller,
     required String label,
     required String hint,
     required double screenWidth,
@@ -82,6 +81,7 @@ class _signUpState extends State<signUp> {
         ),
         SizedBox(height: screenHeight * 0.005),
         TextFormField(
+          controller: controller,
           obscureText: obscureText,
           onChanged: onChanged,
           decoration: InputDecoration(
@@ -130,6 +130,7 @@ class _signUpState extends State<signUp> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTextField(
+                controller: firstNameController,
                 screenWidth: screenWidth,
                 screenHeight: screenHeight,
                 label: 'First Name',
@@ -139,6 +140,7 @@ class _signUpState extends State<signUp> {
                     : null,
               ),
               _buildTextField(
+                controller: lastNameController,
                 screenWidth: screenWidth,
                 screenHeight: screenHeight,
                 label: 'Last Name',
@@ -148,6 +150,7 @@ class _signUpState extends State<signUp> {
                     : null,
               ),
               _buildTextField(
+                controller: emailController,
                 screenWidth: screenWidth,
                 screenHeight: screenHeight,
                 label: 'Email or Phone Number',
@@ -157,6 +160,7 @@ class _signUpState extends State<signUp> {
                     : null,
               ),
               _buildTextField(
+                controller: passwordController,
                 screenWidth: screenWidth,
                 screenHeight: screenHeight,
                 label: 'Password',
@@ -165,12 +169,13 @@ class _signUpState extends State<signUp> {
                 validator: validatePassword,
               ),
               _buildTextField(
+                controller: passwordController,
                 screenWidth: screenWidth,
                 screenHeight: screenHeight,
                 label: 'Confirm Password',
                 hint: 'Confirm your password',
                 obscureText: true,
-                validator: validateConfirmPassword,
+                validator: (value) => null,
               ),
               Text(
                 'Gender',
@@ -208,26 +213,44 @@ class _signUpState extends State<signUp> {
                 ],
               ),
               SizedBox(height: screenHeight * 0.01),
-              GestureDetector(
-                onTap: () {
-                  if (_formKey.currentState!.validate()) {
-                    _navigateToSignIn();
-                  }
-                },
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: AppTheme.darkGreen,
-                    borderRadius: BorderRadius.circular(screenWidth * 0.05),
-                  ),
-                  padding: EdgeInsets.all(screenHeight * 0.02),
-                  child: Center(
-                    child: Text(
-                      "Create Account",
-                      style: GoogleFonts.schibstedGrotesk(
-                        fontWeight: FontWeight.bold,
-                        fontSize: screenWidth * 0.05,
-                        color: AppTheme.white,
+              BlocListener<AuthCubit, AuthStates>(
+                listener: (context, state) {
+        if(state is AuthLoadingState)
+        {
+
+        }
+        else if (state is AuthErrorState){
+
+        }
+        else if(state is AuthSuccessState){
+        _navigateToSignIn();
+        }
+        },
+                child: GestureDetector(
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      context.read<AuthCubit>().register(RegisterRequest(firstNameController.text,
+                          lastNameController.text,
+                          emailController.text,
+                          passwordController.text,
+                          isMale ? "male" : (isFemale ? "female" : "")));
+                    }
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppTheme.darkGreen,
+                      borderRadius: BorderRadius.circular(screenWidth * 0.05),
+                    ),
+                    padding: EdgeInsets.all(screenHeight * 0.02),
+                    child: Center(
+                      child: Text(
+                        "Create Account",
+                        style: GoogleFonts.schibstedGrotesk(
+                          fontWeight: FontWeight.bold,
+                          fontSize: screenWidth * 0.05,
+                          color: AppTheme.white,
+                        ),
                       ),
                     ),
                   ),

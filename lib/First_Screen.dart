@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 import 'package:shop_n_goo/AppTheme.dart';
 import 'package:shop_n_goo/UserInfo/SignIn.dart';
 import 'package:shop_n_goo/UserInfo/signUp.dart';
+import 'package:shop_n_goo/cubit/auth/auth_cubit.dart';
 
 class FirstScreen extends StatelessWidget {
   static const String routeName = "/FirstScreen";
@@ -60,7 +62,9 @@ class FirstScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => signUp()),
+                    MaterialPageRoute(builder: (context) => BlocProvider<AuthCubit>(
+                      create: (context) => AuthCubit(),
+                        child: signUp())),
                   );
                 },
                 child: Container(
@@ -89,7 +93,9 @@ class FirstScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => signIn()),
+                    MaterialPageRoute(builder: (context) => BlocProvider<AuthCubit>(
+                    create: (context) => AuthCubit()
+                    ,child: signIn())),
                   );
                 },
                 child: Container(

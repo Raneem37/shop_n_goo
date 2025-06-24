@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shop_n_goo/AppTheme.dart';
 import 'package:shop_n_goo/UserInfo/LocationScreen.dart';
 import 'package:shop_n_goo/UserInfo/signUp.dart';
+import 'package:shop_n_goo/cubit/auth/auth_cubit.dart';
+import 'package:shop_n_goo/cubit/auth/auth_states.dart';
+import 'package:shop_n_goo/data/models/auth/request/LoginRequest.dart';
 
 
 class signIn extends StatefulWidget {
@@ -22,6 +26,16 @@ class _SignInState extends State<signIn> {
         MaterialPageRoute(builder: (context) => GoogleMapScreen()),
       );
     }
+  }
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -63,6 +77,7 @@ class _SignInState extends State<signIn> {
               ),
               const SizedBox(height: 4),
               TextFormField(
+                controller: emailController,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: AppTheme.darkGreen, width: 2),
@@ -93,6 +108,7 @@ class _SignInState extends State<signIn> {
 
               const SizedBox(height: 4),
               TextFormField(
+                controller: passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
@@ -115,23 +131,41 @@ class _SignInState extends State<signIn> {
               const SizedBox(height: 20),
 
               // Sign In Button
-              GestureDetector(
-                onTap: _signIn,
-                child: Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: AppTheme.darkGreen,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  padding: const EdgeInsets.all(15),
-                  child: Center(
-                    child: Text(
-                      "Sign In",
-                      style: GoogleFonts.schibstedGrotesk(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                        color: AppTheme.white,
+              BlocListener<AuthCubit, AuthStates>(
+                listener: (context, state) {
+                  if(state is AuthLoadingState)
+                    {
+
+                    }
+                  else if (state is AuthErrorState){
+
+                  }
+                  else if(state is AuthSuccessState){
+                    _signIn();
+                  }
+
+                },
+                child: GestureDetector(
+                  onTap:()   {
+                    print("object");
+                    context.read<AuthCubit>().login(LoginRequest(emailController.text, passwordController.text));
+                    },
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.darkGreen,
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    padding: const EdgeInsets.all(15),
+                    child: Center(
+                      child: Text(
+                        "Sign In",
+                        style: GoogleFonts.schibstedGrotesk(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: AppTheme.white,
+                        ),
                       ),
                     ),
                   ),

@@ -62,7 +62,7 @@ class ShopNGo extends StatelessWidget {
         // Scannertab.routeName :(_) =>Scannertab(),
 
       } ,
-      initialRoute:FirstScreen .routeName ,
+      initialRoute:HomeScreen .routeName ,
       theme: ThemeData(
         scaffoldBackgroundColor: AppTheme.Bg,
         appBarTheme: const AppBarTheme(
